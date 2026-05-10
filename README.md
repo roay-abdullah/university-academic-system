@@ -2,7 +2,7 @@
 
 **A comprehensive, database-driven portal for managing university operations, academic records, and student lifecycles.**
 
-Developed by: **Behzad Khan (24F-0575)** and **Roy Abdullah (24F-0570)**.
+Developed by: **Behzad Khan** and **Roy Abdullah**.
 
 ---
 
