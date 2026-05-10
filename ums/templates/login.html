@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>UMS — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
+<style>
+/* ================================================================
+   TOKENS
+================================================================ */
+:root {
+  --bg:       #080f1e;
+  --panel:    #0f1929;
+  --surface:  #141f30;
+  --border:   #1d2e45;
+  --gold:     #f59e0b;
+  --gold-glow:rgba(245,158,11,.18);
+  --text:     #e2e8f0;
+  --muted:    #5a7490;
+  --error:    #ef4444;
+  --success:  #22c55e;
+  --font-h:   'Playfair Display', serif;
+  --font-b:   'DM Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-b);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ================================================================
+   LEFT PANEL — branding / quote
+================================================================ */
+.left-panel {
+  width: 45%;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 52px;
+  position: relative;
+  overflow: hidden;
+}
+/* Grid texture */
+.left-panel::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: .35;
+}
+/* Radial glow */
+.left-panel::after {
+  content: '';
+  position: absolute;
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(245,158,11,.12) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.brand { position: relative; z-index: 1; }
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold-glow);
+  border: 1px solid rgba(245,158,11,.3);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.brand h1 {
+  font-family: var(--font-h);
+  font-size: 2.8rem;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.brand h1 span { color: var(--gold); }
+.brand p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
+  max-width: 340px;
+}
+.features { position: relative; z-index: 1; margin-top: 40px; }
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.feature-icon {
+  width: 36px; height: 36px;
+  background: var(--gold-glow);
+  border: 1px solid rgba(245,158,11,.25);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+.feature-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.feature-text span { font-size: 12px; color: var(--muted); font-weight: 300; }
+.left-footer {
+  position: relative; z-index: 1;
+  font-size: 11px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+
+/* ================================================================
+   RIGHT PANEL — form
+================================================================ */
+.right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+}
+.form-card {
+  width: 100%;
+  max-width: 400px;
+}
+.form-card h2 {
+  font-family: var(--font-h);
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+}
+.form-card .subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 32px;
+  font-weight: 300;
+}
+
+/* Tab switcher */
+.tab-bar {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 28px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 9px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-b);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+}
+.tab-btn.active { background: var(--gold); color: #000; }
+
+/* Form panels */
+.form-panel { display: none; }
+.form-panel.active { display: block; }
+
+.form-group { margin-bottom: 18px; }
+.form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .9px;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.form-group input,
+.form-group select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-family: var(--font-b);
+  font-size: 14px;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+.form-group input::placeholder { color: var(--muted); }
+.form-group select option { background: var(--surface); }
+
+/* Role note */
+.role-note {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 13px;
+  background: var(--gold);
+  border: none;
+  border-radius: 9px;
+  font-family: var(--font-b);
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  margin-top: 4px;
+}
+.btn-submit:hover    { background: #fbbf24; }
+.btn-submit:active   { transform: scale(.98); }
+.btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Alert messages */
+.alert {
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+}
+.alert.show       { display: block; }
+.alert.error      { background: rgba(239,68,68,.12);  border: 1px solid rgba(239,68,68,.3);  color: #fca5a5; }
+.alert.success    { background: rgba(34,197,94,.12);  border: 1px solid rgba(34,197,94,.3);  color: #86efac; }
+
+/* Divider */
+.divider {
+  text-align: center;
+  margin: 22px 0;
+  position: relative;
+  font-size: 12px;
+  color: var(--muted);
+}
+.divider::before, .divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 42%;
+  height: 1px;
+  background: var(--border);
+}
+.divider::before { left: 0; }
+.divider::after  { right: 0; }
+
+/* Student ID conditional */
+#signup-student-id-group { display: none; }
+#signup-student-id-group.visible { display: block; }
+
+/* Spinner inside button */
+.btn-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(0,0,0,.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ================================================================
+   RESPONSIVE
+================================================================ */
+@media (max-width: 768px) {
+  .left-panel { display: none; }
+  body { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="brand">
+    <div class="brand-badge">
+      <span>●</span> BCS-4D · Database Systems
+    </div>
+    <h1>University<br/>Management<br/><span>System</span></h1>
+    <p>A complete database-driven portal for managing students, courses, enrollments, and academic records.</p>
+
+    <div class="features" style="margin-top:32px;">
+      <div class="feature">
+        <div class="feature-icon">🎓</div>
+        <div class="feature-text">
+          <strong>Student Portal</strong>
+          <span>View grades, enrollments & transcript</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛠️</div>
+        <div class="feature-text">
+          <strong>Admin Dashboard</strong>
+          <span>Full CRUD via Oracle stored procedures</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <div class="feature-text">
+          <strong>Live DB Views</strong>
+          <span>At-risk students, workload, grade summary</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="left-footer">
+    Roll No: 24F-0575 &amp; 24F-0570 &nbsp;·&nbsp;
+    Section BCS-4D &nbsp;·&nbsp;
+    Oracle 11g + Flask
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="form-card">
+    <h2>Welcome back</h2>
+    <p class="subtitle">Sign in to access the portal</p>
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn"        onclick="switchTab('signup')">Register</button>
+    </div>
+
+    <!-- Shared alert -->
+    <div class="alert" id="alert-box"></div>
+
+    <!-- ── LOGIN FORM ── -->
+    <div class="form-panel active" id="panel-login">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="login-username" placeholder="Enter your username" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password"/>
+      </div>
+      <button class="btn-submit" id="btn-login" onclick="doLogin()">Sign In</button>
+
+      <div class="divider">Demo accounts</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-submit" style="background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:12px;padding:9px;"
+                onclick="fillDemo('admin','admin123')">
+          👤 Admin
+        </button>
+        <button class="btn-submit" style="background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:12px;padding:9px;"
+                onclick="fillDemo('student101','pass123')">
+          🎓 Student
+        </button>
+      </div>
+    </div>
+
+    <!-- ── SIGNUP FORM ── -->
+    <div class="form-panel" id="panel-signup">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="signup-username" placeholder="Choose a username"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="At least 6 characters"/>
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select id="signup-role" onchange="toggleStudentId()">
+          <option value="Student">Student</option>
+          <option value="Admin">Admin</option>
+        </select>
+        <div class="role-note">Student accounts are linked to a Student ID.</div>
+      </div>
+      <div class="form-group" id="signup-student-id-group">
+        <label>Your Student ID</label>
+        <input type="number" id="signup-student-id" placeholder="e.g. 101"/>
+      </div>
+      <button class="btn-submit" id="btn-signup" onclick="doSignup()">Create Account</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── TAB SWITCHING ─────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) =>
+    b.classList.toggle('active', (tab === 'login' ? i === 0 : i === 1)));
+  document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+  document.getElementById('panel-signup').classList.toggle('active', tab === 'signup');
+  clearAlert();
+}
+
+// ── ALERT ─────────────────────────────────────────────────────
+function showAlert(msg, type) {
+  const el = document.getElementById('alert-box');
+  el.textContent = msg;
+  el.className = 'alert show ' + type;
+}
+function clearAlert() {
+  document.getElementById('alert-box').className = 'alert';
+}
+
+// ── DEMO FILL ─────────────────────────────────────────────────
+function fillDemo(user, pass) {
+  document.getElementById('login-username').value = user;
+  document.getElementById('login-password').value = pass;
+}
+
+// ── STUDENT ID TOGGLE ─────────────────────────────────────────
+function toggleStudentId() {
+  const role = document.getElementById('signup-role').value;
+  document.getElementById('signup-student-id-group')
+    .classList.toggle('visible', role === 'Student');
+}
+toggleStudentId(); // init
+
+// ── LOGIN ─────────────────────────────────────────────────────
+async function doLogin() {
+  const btn = document.getElementById('btn-login');
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  if (!username || !password) {
+    showAlert('Please enter username and password.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span>Signing in…';
+  clearAlert();
+
+  try {
+    const res  = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showAlert(data.error || 'Login failed.', 'error');
+      return;
+    }
+    // Success → redirect to dashboard
+    showAlert('Login successful! Redirecting…', 'success');
+    setTimeout(() => window.location.href = '/', 700);
+  } catch {
+    showAlert('Connection error. Is the server running?', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In';
+  }
+}
+
+// Allow Enter key to submit login
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const active = document.querySelector('.form-panel.active').id;
+    if (active === 'panel-login')  doLogin();
+    if (active === 'panel-signup') doSignup();
+  }
+});
+
+// ── SIGNUP ────────────────────────────────────────────────────
+async function doSignup() {
+  const btn        = document.getElementById('btn-signup');
+  const username   = document.getElementById('signup-username').value.trim();
+  const password   = document.getElementById('signup-password').value;
+  const role       = document.getElementById('signup-role').value;
+  const student_id = document.getElementById('signup-student-id').value || null;
+
+  if (!username || !password) {
+    showAlert('Username and password are required.', 'error');
+    return;
+  }
+  if (password.length < 6) {
+    showAlert('Password must be at least 6 characters.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span>Creating account…';
+  clearAlert();
+
+  try {
+    const res  = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, role,
+                             student_id: student_id ? +student_id : null })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showAlert(data.error || 'Signup failed.', 'error');
+      return;
+    }
+    showAlert('Account created! You can now sign in.', 'success');
+    setTimeout(() => switchTab('login'), 1500);
+  } catch {
+    showAlert('Connection error. Is the server running?', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Create Account';
+  }
+}
+</script>
+</body>
+</html>
