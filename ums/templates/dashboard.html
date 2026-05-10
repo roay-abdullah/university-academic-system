@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>UMS — University Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0b1120;--surface:#111827;--surface2:#1a2236;--border:#1e2d45;
+  --gold:#f59e0b;--gold-dim:#b45309;--text:#e2e8f0;--muted:#64748b;
+  --danger:#ef4444;--success:#22c55e;--info:#38bdf8;--warn:#fb923c;
+  --font-h:'Playfair Display',serif;--font-b:'DM Sans',sans-serif;
+  --r:10px;--s:0 4px 24px rgba(0,0,0,.45);--t:.2s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── AUTH SCREEN ─────────────────────────────────────────────── */
+#auth-screen{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(245,158,11,.08) 0%,transparent 70%),var(--bg);
+}
+.auth-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:40px;width:420px;max-width:95vw;box-shadow:var(--s);
+  animation:slideUp .4s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+.auth-brand{text-align:center;margin-bottom:32px}
+.auth-brand h1{font-family:var(--font-h);font-size:1.8rem;color:var(--gold)}
+.auth-brand p{color:var(--muted);font-size:12px;margin-top:4px}
+.auth-tabs{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:28px}
+.auth-tab{
+  flex:1;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;
+  color:var(--muted);transition:all var(--t);background:transparent;border:none;font-family:var(--font-b);
+}
+.auth-tab.active{background:var(--gold);color:#000}
+.auth-form{display:none}
+.auth-form.active{display:block}
+.auth-form .form-group{margin-bottom:16px}
+.auth-form label{display:block;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.auth-form input,.auth-form select{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font-b);font-size:13px;padding:10px 12px;outline:none;
+  transition:border-color var(--t);
+}
+.auth-form input:focus,.auth-form select:focus{border-color:var(--gold)}
+.auth-form select option{background:var(--surface2)}
+.auth-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-full{width:100%;padding:12px;border-radius:8px;font-size:14px;font-weight:600;
+          font-family:var(--font-b);cursor:pointer;border:none;transition:all var(--t);margin-top:4px}
+.btn-gold-full{background:var(--gold);color:#000}
+.btn-gold-full:hover{background:#fbbf24}
+.auth-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;
+            padding:10px 14px;font-size:12px;color:var(--danger);margin-top:14px;display:none}
+
+/* ── APP LAYOUT ──────────────────────────────────────────────── */
+#app-screen{display:none}
+.layout{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100;
+}
+.sb-brand{padding:24px 20px 18px;border-bottom:1px solid var(--border)}
+.sb-brand h1{font-family:var(--font-h);font-size:1.25rem;color:var(--gold)}
+.sb-brand p{font-size:11px;color:var(--muted);margin-top:3px}
+.sb-user{
+  display:flex;align-items:center;gap:10px;padding:12px 20px;
+  border-bottom:1px solid var(--border);background:var(--surface2);
+}
+.sb-avatar{
+  width:32px;height:32px;border-radius:50%;background:var(--gold);
+  display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-size:12px;flex-shrink:0;
+}
+.sb-user-info{flex:1;min-width:0}
+.sb-username{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-role{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.sb-logout{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:11px;
+           padding:3px 6px;border-radius:5px;transition:all var(--t)}
+.sb-logout:hover{color:var(--danger);background:rgba(239,68,68,.1)}
+.sb-nav{padding:14px 10px;flex:1}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:10px 10px 5px;font-weight:600}
+.nav-item{
+  display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;
+  cursor:pointer;transition:all var(--t);color:#94a3b8;font-weight:500;font-size:13px;margin-bottom:2px;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(245,158,11,.12);color:var(--gold)}
+.nav-item.hidden{display:none}
+.nav-item svg{width:15px;height:15px;flex-shrink:0}
+.sb-footer{padding:14px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+.sb-footer strong{color:var(--text);display:block;margin-bottom:2px}
+
+/* MAIN */
+.main{margin-left:240px;flex:1;padding:30px 34px;min-height:100vh}
+.page{display:none}
+.page.active{display:block}
+.page-header{margin-bottom:24px}
+.page-header h2{font-family:var(--font-h);font-size:1.65rem;color:var(--text)}
+.page-header p{color:var(--muted);margin-top:3px;font-size:13px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+.kpi-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:20px;position:relative;overflow:hidden;transition:border-color var(--t);
+}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:.7}
+.kpi-card:hover{border-color:var(--gold-dim)}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600}
+.kpi-value{font-size:2rem;font-family:var(--font-h);color:var(--gold);margin:5px 0 1px;line-height:1}
+.kpi-sub{font-size:11px;color:var(--muted)}
+.kpi-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);opacity:.07;font-size:3rem}
+
+/* CARD/TABLE */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:22px}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.card-title{font-family:var(--font-h);font-size:1rem;color:var(--text)}
+.card-body{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:10px 15px;text-align:left;white-space:nowrap}
+tbody td{padding:11px 15px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface2)}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600}
+.b-success{background:rgba(34,197,94,.15);color:var(--success)}
+.b-danger{background:rgba(239,68,68,.15);color:var(--danger)}
+.b-info{background:rgba(56,189,248,.15);color:var(--info)}
+.b-warn{background:rgba(245,158,11,.15);color:var(--gold)}
+.empty{text-align:center;padding:36px;color:var(--muted);font-size:13px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;
+     font-family:var(--font-b);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all var(--t)}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold:hover{background:#fbbf24}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:5px 10px;font-size:12px}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity var(--t)}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;width:460px;max-width:95vw;box-shadow:var(--s);transform:translateY(20px);transition:transform var(--t)}
+.overlay.open .modal{transform:translateY(0)}
+.modal h3{font-family:var(--font-h);font-size:1.15rem;margin-bottom:18px;color:var(--gold)}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.form-group input,.form-group select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-b);font-size:13px;padding:9px 12px;outline:none;transition:border-color var(--t)}
+.form-group input:focus,.form-group select:focus{border-color:var(--gold)}
+.form-group select option{background:var(--surface2)}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+
+/* TOAST */
+#toast{position:fixed;bottom:26px;right:26px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 18px;font-size:13px;font-weight:500;box-shadow:var(--s);transform:translateY(70px);opacity:0;transition:all .3s ease;z-index:9999;max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.success{border-left:3px solid var(--success)}
+#toast.error{border-left:3px solid var(--danger)}
+
+/* SPINNER */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* GRID 2-COL */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+.pad{padding:20px}
+
+@media(max-width:860px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .main{margin-left:0;padding:16px}
+  .sidebar{display:none}
+  .g2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     AUTH SCREEN
+================================================================ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <h1>UMS Portal</h1>
+      <p>University Management System &mdash; BCS-4D</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="auth-form active" id="tab-login">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="l-username" placeholder="admin" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="l-password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button class="btn-full btn-gold-full" onclick="doLogin()">Sign In →</button>
+      <div class="auth-error" id="login-err"></div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div class="auth-form" id="tab-signup">
+      <div class="auth-row">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="s-username" placeholder="ahmed_r"/>
+        </div>
+        <div class="form-group">
+          <label>Role</label>
+          <select id="s-role" onchange="toggleStudentId()">
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" id="s-sid-group">
+        <label>Your Student ID <span style="color:var(--muted)">(from system)</span></label>
+        <input type="number" id="s-student-id" placeholder="101"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="s-password" placeholder="Min. 6 characters"/>
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="s-confirm" placeholder="Repeat password"/>
+      </div>
+      <button class="btn-full btn-gold-full" onclick="doSignup()">Create Account →</button>
+      <div class="auth-error" id="signup-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     APP SCREEN
+================================================================ -->
+<div id="app-screen">
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-brand">
+        <h1>UMS Portal</h1>
+        <p>University Management System</p>
+      </div>
+      <div class="sb-user">
+        <div class="sb-avatar" id="sb-avatar">?</div>
+        <div class="sb-user-info">
+          <div class="sb-username" id="sb-username">—</div>
+          <div class="sb-role" id="sb-role-badge">—</div>
+        </div>
+        <button class="sb-logout" onclick="doLogout()" title="Logout">✕</button>
+      </div>
+      <nav class="sb-nav">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" onclick="showPage('dashboard',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+        </div>
+        <div class="nav-label admin-only">Management</div>
+        <div class="nav-item admin-only" onclick="showPage('students',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Students
+        </div>
+        <div class="nav-item" onclick="showPage('courses',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Courses
+        </div>
+        <div class="nav-item" onclick="showPage('sections',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Sections
+        </div>
+        <div class="nav-item admin-only" onclick="showPage('enrollments',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Enrollments
+        </div>
+        <div class="nav-item" onclick="showPage('grades',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Grades
+        </div>
+        <div class="nav-label">Reports</div>
+        <div class="nav-item admin-only" onclick="showPage('views',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>DB Views
+        </div>
+      </nav>
+      <div class="sb-footer">
+        <strong>BCS-4D — Database Systems</strong>
+        24F-0575 &amp; 24F-0570
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="page active">
+        <div class="page-header">
+          <h2>Dashboard</h2>
+          <p>Live database overview</p>
+        </div>
+        <div class="kpi-grid admin-only">
+          <div class="kpi-card"><div class="kpi-label">Students</div><div class="kpi-value" id="stat-students">—</div><div class="kpi-sub">Registered</div><div class="kpi-icon">🎓</div></div>
+          <div class="kpi-card"><div class="kpi-label">Courses</div><div class="kpi-value" id="stat-courses">—</div><div class="kpi-sub">Available</div><div class="kpi-icon">📚</div></div>
+          <div class="kpi-card"><div class="kpi-label">Instructors</div><div class="kpi-value" id="stat-instructors">—</div><div class="kpi-sub">Faculty</div><div class="kpi-icon">🏫</div></div>
+          <div class="kpi-card"><div class="kpi-label">Active Enrollments</div><div class="kpi-value" id="stat-enrollments">—</div><div class="kpi-sub">This term</div><div class="kpi-icon">📋</div></div>
+        </div>
+        <div class="card admin-only">
+          <div class="card-header">
+            <span class="card-title">⚠️ At-Risk Students</span>
+            <button class="btn btn-outline btn-sm" onclick="loadAtRisk('dash-risk')">Refresh</button>
+          </div>
+          <div class="card-body">
+            <table><thead><tr><th>Student</th><th>Course</th><th>Grade</th><th>Status</th></tr></thead>
+            <tbody id="dash-risk"><tr><td colspan="4" class="empty"><div class="spinner"></div></td></tr></tbody></table>
+          </div>
+        </div>
+        <!-- Student self-view: their enrollments -->
+        <div class="card student-only" style="display:none">
+          <div class="card-header"><span class="card-title">My Enrollments</span></div>
+          <div class="card-body">
+            <table><thead><tr><th>Course</th><th>Section</th><th>Status</th></tr></thead>
+            <tbody id="my-enrollments"><tr><td colspan="3" class="empty"><div class="spinner"></div></td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- STUDENTS (admin only) -->
+      <section id="page-students" class="page">
+        <div class="page-header"><h2>Students</h2><p>Manage student records and program transfers</p></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">All Students</span>
+            <button class="btn btn-gold btn-sm" onclick="openModal('m-add-student')">+ Add Student</button>
+          </div>
+          <div class="card-body">
+            <table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>DOB</th><th>Program</th><th>Actions</th></tr></thead>
+            <tbody id="students-tbody"><tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- COURSES -->
+      <section id="page-courses" class="page">
+        <div class="page-header"><h2>Courses</h2><p>Catalogue and prerequisites</p></div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Course Catalogue</span></div>
+          <div class="card-body">
+            <table><thead><tr><th>Code</th><th>Title</th><th>Credits</th><th>Department</th></tr></thead>
+            <tbody id="courses-tbody"><tr><td colspan="4" class="empty"><div class="spinner"></div></td></tr></tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Prerequisite Map</span></div>
+          <div class="card-body">
+            <table><thead><tr><th>Course</th><th>Requires</th><th>Credits</th></tr></thead>
+            <tbody id="prereq-tbody"><tr><td colspan="3" class="empty"><div class="spinner"></div></td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTIONS -->
+      <section id="page-sections" class="page">
+        <div class="page-header"><h2>Sections</h2><p>Seat availability per section</p></div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">All Sections</span><button class="btn btn-outline btn-sm" onclick="loadSections()">Refresh</button></div>
+          <div class="card-body">
+            <table><thead><tr><th>Section</th><th>Course</th><th>Term</th><th>Instructor</th><th>Room</th><th>Capacity</th><th>Seats Left</th></tr></thead>
+            <tbody id="sections-tbody"><tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ENROLLMENTS (admin) -->
+      <section id="page-enrollments" class="page">
+        <div class="page-header"><h2>Enrollments</h2><p>Enroll or drop students via stored procedures</p></div>
+        <div class="g2">
+          <div class="card"><div class="card-header"><span class="card-title">Enroll Student</span></div>
+            <div class="card-body pad">
+              <div class="form-group"><label>Student</label><select id="enroll-sid"></select></div>
+              <div class="form-group"><label>Section</label><select id="enroll-secid"></select></div>
+              <button class="btn btn-gold" onclick="doEnroll()">Enroll → SP: enroll_student</button>
+            </div></div>
+          <div class="card"><div class="card-header"><span class="card-title">Drop Enrollment</span></div>
+            <div class="card-body pad">
+              <div class="form-group"><label>Student</label><select id="drop-sid"></select></div>
+              <div class="form-group"><label>Section</label><select id="drop-secid"></select></div>
+              <button class="btn btn-danger" onclick="doDrop()">Drop → SP: drop_enrollment</button>
+            </div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Active Enrollments</span><button class="btn btn-outline btn-sm" onclick="loadActiveEnrollments()">Refresh</button></div>
+          <div class="card-body">
+            <table><thead><tr><th>ID</th><th>Student</th><th>Course</th><th>Section</th><th>Status</th></tr></thead>
+            <tbody id="enroll-tbody"><tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- GRADES -->
+      <section id="page-grades" class="page">
+        <div class="page-header"><h2>Grades</h2><p>Assign grades — letter grade auto-computed by stored procedure</p></div>
+        <div class="card admin-only" style="max-width:480px;margin-bottom:22px">
+          <div class="card-header"><span class="card-title">Assign Grade</span></div>
+          <div class="card-body pad">
+            <div class="form-group"><label>Enrollment</label><select id="g-enroll"></select></div>
+            <div class="form-group"><label>Exam</label><select id="g-exam"></select></div>
+            <div class="form-group"><label>Score</label><input type="number" id="g-score" placeholder="e.g. 87" min="0"/></div>
+            <button class="btn btn-gold" onclick="doAssignGrade()">Assign → SP: assign_letter_grade</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Grade Summary (student_grade_summary view)</span><button class="btn btn-outline btn-sm" onclick="loadGradeView()">Refresh</button></div>
+          <div class="card-body">
+            <table><thead><tr><th>Student</th><th>Course</th><th>Term</th><th>Avg Score</th><th>Best Grade</th></tr></thead>
+            <tbody id="grade-tbody"><tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- DB VIEWS (admin) -->
+      <section id="page-views" class="page">
+        <div class="page-header"><h2>DB Views</h2><p>Live reads from all four Oracle views</p></div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">instructor_workload</span><button class="btn btn-outline btn-sm" onclick="loadWorkload()">Load</button></div>
+          <div class="card-body">
+            <table><thead><tr><th>Instructor</th><th>Term</th><th>Sections Taught</th><th>Total Seats</th></tr></thead>
+            <tbody id="workload-tbody"><tr><td colspan="4" class="empty">Click Load</td></tr></tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">at_risk_students</span><button class="btn btn-outline btn-sm" onclick="loadAtRisk('at-risk-tbody')">Load</button></div>
+          <div class="card-body">
+            <table><thead><tr><th>Student</th><th>Program</th><th>Course</th><th>Section</th><th>Grade</th><th>Status</th></tr></thead>
+            <tbody id="at-risk-tbody"><tr><td colspan="6" class="empty">Click Load</td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODALS
+================================================================ -->
+<div class="overlay" id="m-add-student">
+  <div class="modal">
+    <h3>Add New Student</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>Student ID</label><input type="number" id="ns-id" placeholder="103"/></div>
+      <div class="form-group"><label>Program</label><select id="ns-prog"></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>First Name</label><input type="text" id="ns-fn" placeholder="Ahmed"/></div>
+      <div class="form-group"><label>Last Name</label><input type="text" id="ns-ln" placeholder="Raza"/></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" id="ns-email" placeholder="ahmed@nu.edu.pk"/></div>
+    <div class="form-group"><label>Date of Birth</label><input type="date" id="ns-dob"/></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('m-add-student')">Cancel</button>
+      <button class="btn btn-gold" onclick="doAddStudent()">Add Student</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-transfer">
+  <div class="modal">
+    <h3>Transfer Student</h3>
+    <div class="form-group"><label>Student ID</label><input type="number" id="tr-sid" readonly/></div>
+    <div class="form-group"><label>New Program</label><select id="tr-prog"></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('m-transfer')">Cancel</button>
+      <button class="btn btn-gold" onclick="doTransfer()">Transfer → SP: transfer_student</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ================================================================
+     JAVASCRIPT
+================================================================ -->
+<script>
+// ── STATE ────────────────────────────────────────────────────────
+let currentUser = null;
+
+// ── AUTH TABS ────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'?i===0:i===1)));
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+  document.getElementById('login-err').style.display = 'none';
+  document.getElementById('signup-err').style.display = 'none';
+}
+function toggleStudentId() {
+  const r = document.getElementById('s-role').value;
+  document.getElementById('s-sid-group').style.display = r === 'student' ? 'block' : 'none';
+}
+
+// ── API HELPER ───────────────────────────────────────────────────
+async function api(path, opts={}) {
+  const r = await fetch(path, { headers:{'Content-Type':'application/json'}, ...opts });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ── TOAST ────────────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = (type==='success'?'✓ ':'✗ ') + msg;
+  el.className = 'show ' + type;
+  setTimeout(() => el.className='', 3200);
+}
+
+// ── SHOW ERROR IN AUTH FORM ──────────────────────────────────────
+function authErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display='block';
+}
+
+// ── LOGIN ────────────────────────────────────────────────────────
+async function doLogin() {
+  document.getElementById('login-err').style.display='none';
+  try {
+    const data = await api('/api/login', {
+      method:'POST',
+      body: JSON.stringify({
+        username: document.getElementById('l-username').value.trim(),
+        password: document.getElementById('l-password').value
+      })
+    });
+    currentUser = data;
+    enterApp(data);
+  } catch(e) { authErr('login-err', e.message); }
+}
+
+// ── SIGNUP ───────────────────────────────────────────────────────
+async function doSignup() {
+  document.getElementById('signup-err').style.display='none';
+  const pw  = document.getElementById('s-password').value;
+  const pw2 = document.getElementById('s-confirm').value;
+  if (pw !== pw2) { authErr('signup-err','Passwords do not match'); return; }
+  try {
+    await api('/api/signup', {
+      method:'POST',
+      body: JSON.stringify({
+        username:   document.getElementById('s-username').value.trim(),
+        password:   pw,
+        role:       document.getElementById('s-role').value,
+        student_id: document.getElementById('s-student-id').value || null
+      })
+    });
+    toast('Account created! Please log in.');
+    switchTab('login');
+  } catch(e) { authErr('signup-err', e.message); }
+}
+
+// ── LOGOUT ───────────────────────────────────────────────────────
+async function doLogout() {
+  await api('/api/logout', {method:'POST'});
+  currentUser = null;
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+// ── ENTER APP ────────────────────────────────────────────────────
+function enterApp(user) {
+  currentUser = user;
+  // Update sidebar user info
+  const initials = user.username.slice(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent   = initials;
+  document.getElementById('sb-username').textContent = user.username;
+  document.getElementById('sb-role-badge').textContent = user.role.toUpperCase();
+
+  // Show/hide admin-only elements
+  const isAdmin = user.role === 'admin';
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
+  document.querySelectorAll('.student-only').forEach(el => el.style.display = isAdmin ? 'none' : '');
+
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display  = 'block';
+
+  loadDashboard();
+}
+
+// ── INIT: check existing session ─────────────────────────────────
+window.addEventListener('load', async () => {
+  try {
+    const data = await api('/api/me');
+    if (data.authenticated) enterApp(data);
+  } catch(e) {}
+});
+
+// ── MODAL HELPERS ────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o =>
+  o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+
+// ── NAVIGATION ───────────────────────────────────────────────────
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+  const loaders={dashboard:loadDashboard,students:loadStudents,courses:loadCourses,
+                 sections:loadSections,enrollments:loadEnrollmentsPage,grades:loadGradesPage};
+  if(loaders[name]) loaders[name]();
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────
+async function loadDashboard() {
+  if(currentUser?.role==='admin') {
+    try {
+      const s = await api('/api/stats');
+      document.getElementById('stat-students').textContent    = s.students;
+      document.getElementById('stat-courses').textContent     = s.courses;
+      document.getElementById('stat-instructors').textContent = s.instructors;
+      document.getElementById('stat-enrollments').textContent = s.enrollments;
+    } catch(e){}
+    loadAtRisk('dash-risk');
+  } else {
+    // Student: show their own enrollments
+    const tbody = document.getElementById('my-enrollments');
+    try {
+      const rows = await api('/api/enrollments/active');
+      tbody.innerHTML = rows.map(r=>`<tr><td>${r.course}</td><td>${r.section_number}</td><td><span class="badge b-success">${r.status}</span></td></tr>`).join('')
+        || '<tr><td colspan="3" class="empty">No active enrollments</td></tr>';
+    } catch(e){ tbody.innerHTML=`<tr><td colspan="3" class="empty">${e.message}</td></tr>`; }
+  }
+}
+
+// ── AT RISK ──────────────────────────────────────────────────────
+async function loadAtRisk(id) {
+  const tbody = document.getElementById(id);
+  tbody.innerHTML = '<tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>';
+  try {
+    const rows = await api('/api/views/at_risk');
+    if(id==='dash-risk') {
+      tbody.innerHTML = rows.map(r=>`<tr><td>${r.student}</td><td>${r.course}</td>
+        <td><span class="badge b-danger">${r.letter_grade??'—'}</span></td>
+        <td><span class="badge ${r.status==='Dropped'?'b-warn':'b-info'}">${r.status}</span></td></tr>`).join('')
+        || '<tr><td colspan="4" class="empty">No at-risk students 🎉</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map(r=>`<tr><td>${r.student}</td><td>${r.program}</td><td>${r.course}</td>
+        <td>${r.section_number}</td><td><span class="badge b-danger">${r.letter_grade??'—'}</span></td>
+        <td><span class="badge b-warn">${r.status}</span></td></tr>`).join('')
+        || '<tr><td colspan="6" class="empty">None found</td></tr>';
+    }
+  } catch(e){ tbody.innerHTML=`<tr><td colspan="6" class="empty">${e.message}</td></tr>`; }
+}
+
+// ── STUDENTS ─────────────────────────────────────────────────────
+async function loadStudents() {
+  const tbody = document.getElementById('students-tbody');
+  try {
+    const rows = await api('/api/students');
+    tbody.innerHTML = rows.map(r=>`<tr>
+      <td>${r.student_id}</td><td>${r.first_name} ${r.last_name}</td>
+      <td><a href="mailto:${r.email}" style="color:var(--info)">${r.email}</a></td>
+      <td>${r.date_of_birth??'—'}</td><td>${r.program}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="openTransfer(${r.student_id})">Transfer</button></td>
+    </tr>`).join('') || '<tr><td colspan="6" class="empty">No students found</td></tr>';
+  } catch(e){ tbody.innerHTML=`<tr><td colspan="6" class="empty">${e.message}</td></tr>`; }
+  populatePrograms('ns-prog'); populatePrograms('tr-prog');
+}
+
+async function doAddStudent() {
+  try {
+    await api('/api/students', { method:'POST', body: JSON.stringify({
+      student_id:    +document.getElementById('ns-id').value,
+      first_name:    document.getElementById('ns-fn').value,
+      last_name:     document.getElementById('ns-ln').value,
+      email:         document.getElementById('ns-email').value,
+      date_of_birth: document.getElementById('ns-dob').value,
+      program_id:    +document.getElementById('ns-prog').value
+    })});
+    closeModal('m-add-student'); toast('Student added'); loadStudents();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+function openTransfer(sid) {
+  document.getElementById('tr-sid').value = sid;
+  openModal('m-transfer');
+}
+
+async function doTransfer() {
+  try {
+    await api('/api/transfer',{method:'POST',body:JSON.stringify({
+      student_id:     +document.getElementById('tr-sid').value,
+      new_program_id: +document.getElementById('tr-prog').value
+    })});
+    closeModal('m-transfer'); toast('Transfer successful'); loadStudents();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+// ── COURSES ──────────────────────────────────────────────────────
+async function loadCourses() {
+  const tbody = document.getElementById('courses-tbody');
+  try {
+    const rows = await api('/api/courses');
+    tbody.innerHTML = rows.map(r=>`<tr><td><span class="badge b-info">${r.code}</span></td>
+      <td>${r.title}</td><td>${r.credits} cr</td><td>${r.department}</td></tr>`).join('');
+  } catch(e){ tbody.innerHTML=`<tr><td colspan="4" class="empty">${e.message}</td></tr>`; }
+  const ptbody = document.getElementById('prereq-tbody');
+  try {
+    const rows = await api('/api/views/prereq_map');
+    ptbody.innerHTML = rows.map(r=>`<tr><td>${r.course_code} – ${r.course_title}</td>
+      <td>${r.requires_code} – ${r.requires_title}</td><td>${r.prereq_credits} cr</td></tr>`).join('')
+      || '<tr><td colspan="3" class="empty">No prerequisites</td></tr>';
+  } catch(e){ ptbody.innerHTML=`<tr><td colspan="3" class="empty">${e.message}</td></tr>`; }
+}
+
+// ── SECTIONS ────────────────────────────────────────────────────
+async function loadSections() {
+  const tbody = document.getElementById('sections-tbody');
+  try {
+    const rows = await api('/api/sections');
+    tbody.innerHTML = rows.map(r=>{
+      const b = r.seats_left<=0?'b-danger':r.seats_left<5?'b-warn':'b-success';
+      return `<tr><td>${r.section_number}</td><td>${r.course_code} – ${r.course_title}</td>
+        <td>${r.term}</td><td>${r.instructor}</td><td>${r.room}</td><td>${r.capacity}</td>
+        <td><span class="badge ${b}">${r.seats_left} left</span></td></tr>`;
+    }).join('');
+  } catch(e){ tbody.innerHTML=`<tr><td colspan="7" class="empty">${e.message}</td></tr>`; }
+}
+
+// ── ENROLLMENTS ─────────────────────────────────────────────────
+async function loadEnrollmentsPage() {
+  await loadActiveEnrollments();
+  const [students,sections] = await Promise.all([api('/api/students'),api('/api/sections')]);
+  const sHtml = students.map(s=>`<option value="${s.student_id}">${s.student_id} – ${s.first_name} ${s.last_name}</option>`).join('');
+  const secHtml = sections.map(s=>`<option value="${s.section_id}">${s.section_number} – ${s.course_title}</option>`).join('');
+  ['enroll-sid','drop-sid'].forEach(id=>document.getElementById(id).innerHTML=sHtml);
+  ['enroll-secid','drop-secid'].forEach(id=>document.getElementById(id).innerHTML=secHtml);
+}
+
+async function loadActiveEnrollments() {
+  const tbody = document.getElementById('enroll-tbody');
+  try {
+    const rows = await api('/api/enrollments/active');
+    tbody.innerHTML = rows.map(r=>`<tr><td>${r.enrollment_id}</td><td>${r.student}</td>
+      <td>${r.course}</td><td>${r.section_number}</td>
+      <td><span class="badge b-success">${r.status}</span></td></tr>`).join('')
+      || '<tr><td colspan="5" class="empty">No active enrollments</td></tr>';
+  } catch(e){ tbody.innerHTML=`<tr><td colspan="5" class="empty">${e.message}</td></tr>`; }
+}
+
+async function doEnroll() {
+  try {
+    await api('/api/enroll',{method:'POST',body:JSON.stringify({
+      student_id:+document.getElementById('enroll-sid').value,
+      section_id:+document.getElementById('enroll-secid').value
+    })});
+    toast('Enrolled successfully'); loadActiveEnrollments();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+async function doDrop() {
+  try {
+    await api('/api/drop',{method:'POST',body:JSON.stringify({
+      student_id:+document.getElementById('drop-sid').value,
+      section_id:+document.getElementById('drop-secid').value
+    })});
+    toast('Enrollment dropped'); loadActiveEnrollments();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+// ── GRADES ───────────────────────────────────────────────────────
+async function loadGradesPage() {
+  loadGradeView();
+  if(currentUser?.role==='admin') {
+    try {
+      const [enroll,exams] = await Promise.all([api('/api/enrollments/active'),api('/api/exams')]);
+      document.getElementById('g-enroll').innerHTML = enroll.map(e=>`<option value="${e.enrollment_id}">#${e.enrollment_id} – ${e.student} (${e.course})</option>`).join('');
+      document.getElementById('g-exam').innerHTML   = exams.map(e=>`<option value="${e.exam_id}">${e.type} – ${e.course} (Max:${e.max_score})</option>`).join('');
+    } catch(e){}
+  }
+}
+
+async function loadGradeView() {
+  const tbody = document.getElementById('grade-tbody');
+  try {
+    const rows = await api('/api/views/student_grades');
+    tbody.innerHTML = rows.map(r=>{
+      const b = r.best_grade==='A'?'b-success':r.best_grade==='F'?'b-danger':'b-info';
+      return `<tr><td>${r.full_name}</td><td>${r.course}</td><td>${r.term}</td>
+        <td>${r.avg_score?Number(r.avg_score).toFixed(1):'—'}</td>
+        <td><span class="badge ${b}">${r.best_grade}</span></td></tr>`;
+    }).join('') || '<tr><td colspan="5" class="empty">No grades recorded</td></tr>';
+  } catch(e){ tbody.innerHTML=`<tr><td colspan="5" class="empty">${e.message}</td></tr>`; }
+}
+
+async function doAssignGrade() {
+  try {
+    await api('/api/grade',{method:'POST',body:JSON.stringify({
+      enrollment_id:+document.getElementById('g-enroll').value,
+      exam_id:      +document.getElementById('g-exam').value,
+      score:        +document.getElementById('g-score').value
+    })});
+    toast('Grade assigned'); loadGradeView();
+  } catch(e){ toast(e.message,'error'); }
+}
+
+// ── DB VIEWS ────────────────────────────────────────────────────
+async function loadWorkload() {
+  const tbody = document.getElementById('workload-tbody');
+  try {
+    const rows = await api('/api/views/instructor_workload');
+    tbody.innerHTML = rows.map(r=>`<tr><td>${r.instructor}</td><td>${r.term}</td>
+      <td>${r.sections_taught}</td><td>${r.total_seats}</td></tr>`).join('')
+      || '<tr><td colspan="4" class="empty">No data</td></tr>';
+  } catch(e){ tbody.innerHTML=`<tr><td colspan="4" class="empty">${e.message}</td></tr>`; }
+}
+
+// ── DROPDOWN HELPERS ────────────────────────────────────────────
+async function populatePrograms(id) {
+  try {
+    const ps = await api('/api/programs');
+    document.getElementById(id).innerHTML = ps.map(p=>`<option value="${p.program_id}">${p.name}</option>`).join('');
+  } catch(e){}
+}
+
+// ── ENTER KEY SUPPORT ────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if(e.key==='Enter') {
+    if(document.getElementById('tab-login').classList.contains('active')) doLogin();
+    else if(document.getElementById('tab-signup').classList.contains('active')) doSignup();
+  }
+});
+</script>
+</body>
+</html>
